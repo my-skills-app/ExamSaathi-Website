@@ -1,18 +1,18 @@
 // Platform detection function
 function getPlatform() {
     const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-    
-    // Windows
+
+    // Windows Phone must come first because its UA also contains "Android"
     if (/windows phone/i.test(userAgent)) return 'windows-phone';
-    if (/win/i.test(userAgent)) return 'windows';
     
     // Android
     if (/android/i.test(userAgent)) return 'android';
     
-    // iOS/iPadOS
-    if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
-        return 'ios';
-    }
+    // iOS detection from: http://stackoverflow.com/a/9039885/177710
+    if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) return 'ios';
+    
+    // Windows
+    if (/windows|win32/i.test(userAgent)) return 'windows';
     
     // macOS
     if (/Mac/i.test(userAgent)) return 'macos';
@@ -23,6 +23,77 @@ function getPlatform() {
     // Default
     return 'desktop';
 }
+
+// Toggle mobile menu
+const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+const navLinks = document.querySelector('.nav-links');
+
+if (mobileMenuToggle && navLinks) {
+    mobileMenuToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        navLinks.classList.toggle('active');
+        mobileMenuToggle.classList.toggle('active');
+        
+        // Toggle between hamburger and close icon
+        const icon = mobileMenuToggle.querySelector('i');
+        if (mobileMenuToggle.classList.contains('active')) {
+            icon.classList.remove('fa-bars');
+            icon.classList.add('fa-times');
+            document.body.classList.add('menu-open'); // Prevent scrolling when menu is open
+        } else {
+            icon.classList.remove('fa-times');
+            icon.classList.add('fa-bars');
+            document.body.classList.remove('menu-open'); // Re-enable scrolling
+        }
+    });
+
+    // Close menu when clicking on a nav link
+    document.querySelectorAll('.nav-links a').forEach(link => {
+        link.addEventListener('click', () => {
+            navLinks.classList.remove('active');
+            mobileMenuToggle.classList.remove('active');
+            const icon = mobileMenuToggle.querySelector('i');
+            icon.classList.remove('fa-times');
+            icon.classList.add('fa-bars');
+            document.body.classList.remove('menu-open'); // Re-enable scrolling
+        });
+    });
+
+    // Close menu when clicking outside
+    document.addEventListener('click', (e) => {
+        if (navLinks.classList.contains('active') && 
+            !navLinks.contains(e.target) && 
+            !mobileMenuToggle.contains(e.target)) {
+            navLinks.classList.remove('active');
+            mobileMenuToggle.classList.remove('active');
+            const icon = mobileMenuToggle.querySelector('i');
+            icon.classList.remove('fa-times');
+            icon.classList.add('fa-bars');
+            document.body.classList.remove('menu-open'); // Re-enable scrolling
+        }
+    });
+}
+
+// Smooth scroll for anchor links
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const targetId = this.getAttribute('href');
+        if (targetId === '#') return;
+        
+        const targetElement = document.querySelector(targetId);
+        if (targetElement) {
+            const headerOffset = 80;
+            const elementPosition = targetElement.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+            window.scrollTo({
+                top: offsetPosition,
+                behavior: 'smooth'
+            });
+        }
+    });
+});
 
 // Update download button based on platform
 function updateDownloadButton() {
