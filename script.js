@@ -130,7 +130,7 @@ function updateDownloadButton() {
 document.addEventListener('DOMContentLoaded', () => {
     const header = document.getElementById('main-header');
     const appGrid = document.getElementById('app-grid');
-    const API_URL = 'https://api.asmultiverse.com/get-apps';
+    const API_URL = 'https://asmapiserver.onrender.com/get-apps';
     
     // Update download button based on platform
     updateDownloadButton();
